@@ -54,8 +54,8 @@
         </nav>
     </header>
     <!-- <main> tag HTML que indica o conteúdo principal de uma página -->
+    <button id="updateButton" class="update" onclick="atualizarDashboard()">Atualizar</button>
     <main class="container">
-        <button onclick="atualizarDashboard()">Atualizar</button>
         <div class="dash">
             <header>
                 <div>
@@ -73,23 +73,23 @@
                 <div class="first-graph">
                     <div class="pricipal-content">
                         <div class="indicators">
-                            <div class="indicator success">
+                            <div id="indicator_current_temp" class="indicator success">
                                 <div class="information">
                                     <small>
                                         Temperatura (°C) 
                                         <span>Atual</span>
                                     </small>
-                                    <span class="measurement">3,8°</span>
+                                    <span id="current_temp" class="measurement">3,8°</span>
                                 </div>
                                 <img class="indicator-icon" src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/icone_termometro.svg?raw=true" alt="Termometro">
                             </div>
-                            <div class="indicator warning">
+                            <div id="indicator_avg_temp" class="indicator warning">
                                 <div class="information">
                                     <small>
                                         Temperatura (°C) 
                                         <span>Média</span>
                                     </small>
-                                    <span class="measurement">6,0°</span>
+                                    <span id="avg" class="measurement">6,0°</span>
                                 </div>
                                 <img class="indicator-icon" src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/icone_termometro.svg?raw=true" alt="Termometro">
                             </div>
@@ -200,15 +200,28 @@
     async function atualizarDashboard(){
         const resposta = await fetch('/medidas/ultimas');
         const dados = await resposta.json();
+        console.log(dados);
         var totalAberturas = 0;
+        var soma = 0;
         dados.forEach(dado => {
+            soma += dado.valor;
             if(dado.fkSensor === 2){
                 if(dados.valor === 1){
                     totalAberturas++;
                 }
             }            
         });
+        var media = soma / dados.length;
+        if(media >= 8 || media <= 2){
+            indicator_avg_temp.classList.remove("warning");
+            indicator_avg_temp.classList.add("danger");
+        }else{
+            indicator_avg_temp.classList.remove("warning");
+            indicator_avg_temp.classList.add("success");   
+        }
         measurement.innerHTML = totalAberturas;
+        current_temp.innerHTML = dados[dados.length - 1].valor;
+        avg.innerHTML = media;
     }
 
     </script>

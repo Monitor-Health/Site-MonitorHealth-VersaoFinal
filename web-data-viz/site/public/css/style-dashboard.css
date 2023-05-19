@@ -291,3 +291,19 @@ ul li a:hover{
 .icon{
     width: 24px;
 }
+
+.update{
+    height: fit-content;
+    padding: 10px;
+    background-color: #008B91;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    border:none;
+    cursor: pointer;
+}
+
+.update:hover{
+    opacity: .4;
+    transition: .3s;
+}

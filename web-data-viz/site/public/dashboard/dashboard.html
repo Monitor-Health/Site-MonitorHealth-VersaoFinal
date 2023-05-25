@@ -81,17 +81,17 @@
                                         Temperatura (°C) 
                                         <span>Atual</span>
                                     </small>
-                                    <span class="measurement">3,8°</span>
+                                    <span id="current_temp" class="measurement"></span>
                                 </div>
                                 <img class="indicator-icon" src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/icone_termometro.svg?raw=true" alt="Termometro">
                             </div>
-                            <div class="indicator warning">
+                            <div class="indicator warning" id="indicator_avg_temp">
                                 <div class="information">
                                     <small>
                                         Temperatura (°C) 
                                         <span>Média</span>
                                     </small>
-                                    <span class="measurement">6,0°</span>
+                                    <span id="avg" class="measurement"></span>
                                 </div>
                                 <img class="indicator-icon" src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/icone_termometro.svg?raw=true" alt="Termometro">
                             </div>
@@ -123,7 +123,7 @@
                                         Total de
                                         <span>Aberturas (Dia)</span>
                                     </small>
-                                    <span class="measurement">120</span>
+                                    <span id="measurement" class="measurement"></span>
                                 </div>
                                 <img class="indicator-icon" src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/icone_floco_neve.svg?raw=true" alt="Termometro">
                             </div>
@@ -185,19 +185,218 @@
         </div>
     </main>    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./src2/index.js"></script>
 </body>
 </html>
 <script>
-    const dataAno = new Date()
-    const dia = String(dataAno.getDate()).padStart(2, '0')
-    const mes = String(dataAno.getMonth() + 1).padStart(2, '0')
-    const ano = dataAno.getFullYear()
-    const hora = String(dataAno.getHours()).padStart(2, '0')
-    const minutos = String(dataAno.getMinutes()).padStart(2, '0')
-    const segundos = String(dataAno.getSeconds()).padStart(2, '0')
+    const data = new Date()
+    const dia = String(data.getDate()).padStart(2, '0')
+    const mes = String(data.getMonth() + 1).padStart(2, '0')
+    const ano = data.getFullYear()
+    const hora = String(data.getHours()).padStart(2, '0')
+    const minutos = String(data.getMinutes()).padStart(2, '0')
+    const segundos = String(data.getSeconds()).padStart(2, '0')
     dataAtual.innerHTML = `${dia}/${mes}/${ano} - ${hora}:${minutos}:${segundos}`
-    </script>
+
+    async function atualizarDashboard() {
+        const resposta = await fetch('/medidas/ultimas');
+        const dados = await resposta.json();
+        var totalAberturas = 0;
+        var soma = 0;
+        var temperaturas = [];
+        dados.forEach(dado => {
+            soma += dado.valor;
+            if (dado.tipo == "Presença") {
+                if(dado.valor == 1){
+                    totalAberturas++;
+                }
+            } else {
+                temperaturas.push(dado.valor);
+            }
+        });
+        var media = soma / dados.length;
+        if (media >= 8 || media <= 2) {
+            indicator_avg_temp.classList.remove("warning");
+            indicator_avg_temp.classList.add("danger");
+        } else {
+            indicator_avg_temp.classList.remove("danger");
+            indicator_avg_temp.classList.remove("warning");
+            indicator_avg_temp.classList.add("success");
+        }
+        measurement.innerHTML = totalAberturas;
+        console.log(temperaturas);
+        current_temp.innerHTML = temperaturas[temperaturas.length - 1].toFixed(2);
+        avg.innerHTML = media.toFixed(2);
+        setTimeout(atualizarDashboard, 1000);
+        
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        const resposta = await fetch('/medidas/ultimas');
+        const dados = await resposta.json();
+        createFirstChart(dados);
+        createSecondChart(dados);
+        setTimeout(atualizarDashboard, 1000);
+    });
+
+    function createFirstChart(values) {
+        var times = [];
+        values.forEach(d => {
+            if(d.fkSensor == 1){
+                times.push(parseDate(new Date(d.dt_hora)));
+            }
+        })
+        var temperatures = [];
+        values.forEach(d => {
+            if (d.fkSensor == 1) {
+                temperatures.push(d.valor);
+            }
+        })
+
+        const labels = times;
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Temperatura °C',
+                backgroundColor: 'rgb(77,77,77)',
+                borderColor: 'rgb(77,77,77)',
+                data: temperatures
+            }]
+        }
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        suggestedMin: 0,
+                        suggestedMax: 10
+                    },
+                    x: {
+                        suggestedMax: 10
+                    }
+
+                },
+                plugins: {
+                    title: {
+                        text: "Temperatura °C"
+
+
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: "Montserrat",
+                                weight: "bold"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        new Chart(
+            document.getElementById('first_chart'),
+            config
+        )
+    }
+
+    function createSecondChart(values) {
+        var times = [];
+        values.forEach(d => {
+            if(d.fkSensor == 1){
+                times.push(parseDate(new Date(d.dt_hora)));
+            }
+        })
+        var temperatures = [];
+        var isPresent = [];
+        values.forEach(d => {
+            if (d.fkSensor == 1) {
+                temperatures.push(d.valor);
+            } else {
+                isPresent.push(d.valor);
+            }
+        })
+
+        const labels2 = times;
+        const data2 = {
+            labels: labels2,
+            datasets: [{
+                label: 'Temperatura °C',
+                backgroundColor: 'rgb(77,77,77)',
+                borderColor: 'rgb(77,77,77)',
+                data: temperatures,
+                yAxisID: 'Temperatura',
+                type: 'line',
+                tension: 0.4
+            },
+            {
+                label: 'Abertura',
+                backgroundColor: 'rgb(224,224,224)',
+                borderColor: 'rgb(224,224,224)',
+                data: isPresent,
+                yAxisID: 'Y',
+                type: 'bar'
+            }
+            ]
+
+        }
+        const config2 = {
+            data: data2,
+            options: {
+                responsive: true,
+                scales: {
+                    Y: {
+                        type: 'linear',
+                        position: 'left'
+                    },
+                    Temperatura: {
+                        beginAtZero: true,
+                        suggestedMax: 10,
+                        type: 'linear',
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            callback: function (value, index, values) {
+                                return `${value} °C `
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        text: "Temperatura °C"
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: "Montserrat",
+                                weight: "bold"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        new Chart(
+            document.getElementById('second_chart'),
+            config2
+        )
+    }
+
+    function parseDate(data) {
+        const dia = String(data.getDate()).padStart(2, '0')
+        const mes = String(data.getMonth() + 1).padStart(2, '0')
+        const ano = data.getFullYear()
+        const hora = String(data.getHours()).padStart(2, '0')
+        const minutos = String(data.getMinutes()).padStart(2, '0')
+        const segundos = String(data.getSeconds()).padStart(2, '0')
+        dataAtual.innerHTML = `${dia}/${mes}/${ano} - ${hora}:${minutos}:${segundos}`
+        return `${hora}:${minutos}:${segundos}`;
+    }
+</script>
     
 
 

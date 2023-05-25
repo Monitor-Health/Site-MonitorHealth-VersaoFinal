@@ -55,10 +55,52 @@
     function login(){
         var email = input_email.value;
         var senha = input_senha.value;
-        if(email == "administrador@gmail.com" && senha == "admin@123"){
-            window.location.href = "../dash/dashboard.html";
-        }else{
-            alert("E-mail ou senha inválidos")
-        }
+        // if(email == "administrador@gmail.com" && senha == "admin@123"){
+        //     window.location.href = "../dash/dashboard.html";
+        // }else{
+        //     alert("E-mail ou senha inválidos")
+        // }
+        fetch("/usuarios/autenticar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                emailServer: email,
+                senhaServer: senha
+            })
+        }).then(function (resposta) {
+            
+
+            if (resposta.ok) {
+                console.log(resposta);
+
+                resposta.json().then(json => {
+                  
+
+                    sessionStorage.EMAIL_USUARIO = json.email;
+                    sessionStorage.NOME_USUARIO = json.nome;
+                    sessionStorage.ID_USUARIO = json.id;
+
+                    window.location.href = "../dashboard/dashboard.html"
+
+                });
+
+            } else {
+
+             
+
+                resposta.text().then(texto => {
+                    console.error(texto);
+                  
+                });
+            }
+
+        }).catch(function (erro) {
+            console.log(erro);
+        })
+
+        return false;
     }
+    
 </script>

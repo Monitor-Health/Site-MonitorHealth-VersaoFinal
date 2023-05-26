@@ -1,6 +1,6 @@
 var database = require("../database/config");
 
-function buscarUltimasMedidas() {
+function buscarUltimasMedidas(idFreezer) {
 
     instrucaoSql = ''
 
@@ -14,7 +14,7 @@ function buscarUltimasMedidas() {
                     where fk_aquario = ${idAquario}
                     order by id desc`;
     } else if (process.env.AMBIENTE_PROCESSO == "desenvolvimento") {
-        instrucaoSql = `select * from monitorhealth.dados join sensor on dados.fksensor = sensor.id join tiposensor on sensor.fkTipoSensor = tiposensor.id order by dados.dt_hora desc limit 20`;
+        instrucaoSql = `select * from monitorhealth.dados join sensor on dados.fkidsensor = sensor.id and dados.fktiposensor = sensor.tipo where dados.fkidsensor = ${idFreezer} order by dados.dt_hora desc limit 20`;
     } else {
         console.log("\nO AMBIENTE (produção OU desenvolvimento) NÃO FOI DEFINIDO EM app.js\n");
         return

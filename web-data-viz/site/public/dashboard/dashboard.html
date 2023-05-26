@@ -62,11 +62,13 @@
             <header>
                 <div>
                     <h1>Dashboard</h1>
-                    <select name="local" id="" onchange="window.location.href=this.value">
+                    <select name="local" id="input_freezer">
                         <option value="" disabled selected>Selecione o Ambiente</option>
-                        <option selected value="dashboard.html">Freezer 1</option>
-                        <option value="dashboardCongelante.html">Freezer 2</option>
-                        <option value="dashboardDerretendo.html">Freezer 3</option>
+                        <option selected value="1">Freezer 1</option>
+                        <option value="2">Freezer 2</option>
+                        <option value="3">Freezer 3</option>
+                        <option value="4">Freezer 2</option>
+                        <option value="5">Freezer 3</option>
                     </select>
                 </div>
                 <small class="date" id="dataAtual">17/04/2023 - 12:06:23</small>
@@ -197,15 +199,20 @@
     const segundos = String(data.getSeconds()).padStart(2, '0')
     dataAtual.innerHTML = `${dia}/${mes}/${ano} - ${hora}:${minutos}:${segundos}`
 
+    freezer = 1;
+    var firstChart = document.getElementById('first_chart');
+    var secondChart = document.getElementById('second_chart');
+
     async function atualizarDashboard() {
-        const resposta = await fetch('/medidas/ultimas');
+        freezer = Number(input_freezer.value)
+        const resposta = await fetch(`/medidas/ultimas/${freezer}`);
         const dados = await resposta.json();
         var totalAberturas = 0;
         var soma = 0;
         var temperaturas = [];
         dados.forEach(dado => {
             soma += dado.valor;
-            if (dado.tipo == "Presença") {
+            if (dado.tipo == 1) {
                 if(dado.valor == 1){
                     totalAberturas++;
                 }
@@ -223,15 +230,42 @@
             indicator_avg_temp.classList.add("success");
         }
         measurement.innerHTML = totalAberturas;
-        console.log(temperaturas);
+        console.log(dados);
         current_temp.innerHTML = temperaturas[temperaturas.length - 1].toFixed(2);
         avg.innerHTML = media.toFixed(2);
+        updateChart(dados, firstChart, secondChart);
         setTimeout(atualizarDashboard, 1000);
         
     }
 
+    function updateChart(values, chart1, chart2){
+        var temperaturas = values.map(d => {
+            if(d.fktipoSensor == 2){
+                return d.valor;
+            }
+        });
+        var isPresent = values.map(d => {
+            if(d.fktipoSensor == 1){
+                if(d.valor == 1){
+                    return d.valor;
+                }
+            }
+        });
+        var times = [];
+        values.forEach(d => {
+            times.push(parseDate(new Date(d.dt_hora)));
+        })
+        chart1.data.datasets[0].data = temperaturas;
+        chart2.data.datasets[0].data = temperaturas;
+        chart1.labels = times;
+        chart2.labels = times;
+        chart2.data.datasets[1].data = isPresent;
+        chart1.update();
+        chart2.update();
+    }
+    
     window.addEventListener("DOMContentLoaded", async () => {
-        const resposta = await fetch('/medidas/ultimas');
+        const resposta = await fetch(`/medidas/ultimas/${freezer}`);
         const dados = await resposta.json();
         createFirstChart(dados);
         createSecondChart(dados);
@@ -239,15 +273,16 @@
     });
 
     function createFirstChart(values) {
+        
         var times = [];
         values.forEach(d => {
-            if(d.fkSensor == 1){
+            if(d.fktipoSensor == 1){
                 times.push(parseDate(new Date(d.dt_hora)));
             }
         })
         var temperatures = [];
         values.forEach(d => {
-            if (d.fkSensor == 1) {
+            if (d.fktipoSensor == 2) {
                 temperatures.push(d.valor);
             }
         })
@@ -294,23 +329,22 @@
                 }
             }
         }
-        new Chart(
-            document.getElementById('first_chart'),
-            config
-        )
+
+        var ctx = document.getElementById('first_chart');  
+        firstChart = new Chart(ctx, config)
     }
 
     function createSecondChart(values) {
         var times = [];
         values.forEach(d => {
-            if(d.fkSensor == 1){
+            if(d.fktipoSensor == 1){
                 times.push(parseDate(new Date(d.dt_hora)));
             }
         })
         var temperatures = [];
         var isPresent = [];
         values.forEach(d => {
-            if (d.fkSensor == 1) {
+            if (d.fktipoSensor == 2) {
                 temperatures.push(d.valor);
             } else {
                 isPresent.push(d.valor);
@@ -380,10 +414,8 @@
             }
         }
 
-        new Chart(
-            document.getElementById('second_chart'),
-            config2
-        )
+        var ctx = document.getElementById('second_chart');
+        secondChart = new Chart(ctx, config2)
     }
 
     function parseDate(data) {

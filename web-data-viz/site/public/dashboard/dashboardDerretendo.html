@@ -231,4 +231,196 @@
     const minutos = String(dataAno.getMinutes()).padStart(2, '0')
     const segundos = String(dataAno.getSeconds()).padStart(2, '0')
     dataAtual.innerHTML = `${dia}/${mes}/${ano} - ${hora}:${minutos}:${segundos}`
+
+    async function atualizarDashboard() {
+        const resposta = await fetch('/medidas/ultimas/');
+        const dados = await resposta.json();
+        var totalAberturas = 0;
+        var soma = 0;
+        var temperaturas = [];
+        dados.forEach(dado => {
+            soma += dado.valor;
+            if (dado.tipo == 1) {
+                if(dado.valor == 1){
+                    if(dado.fkSensor == 3){
+                        totalAberturas++;
+                    }
+                }
+            } else {
+                if(dado.fkSensor == 8){
+                    temperaturas.push(dado.valor);
+                }
+            }
+        });
+        var media = soma / dados.length;
+        if (media >= 8 || media <= 2) {
+            indicator_avg_temp.classList.remove("warning");
+            indicator_avg_temp.classList.add("danger");
+        } else {
+            indicator_avg_temp.classList.remove("danger");
+            indicator_avg_temp.classList.remove("warning");
+            indicator_avg_temp.classList.add("success");
+        }
+        measurement.innerHTML = totalAberturas;
+        console.log(temperaturas);
+        current_temp.innerHTML = temperaturas[temperaturas.length - 1].toFixed(2);
+        avg.innerHTML = media.toFixed(2);
+        setTimeout(atualizarDashboard, 1000);
+        
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        const resposta = await fetch('/medidas/ultimas');
+        const dados = await resposta.json();
+        createFirstChart(dados);
+        createSecondChart(dados);
+        setTimeout(atualizarDashboard, 1000);
+    });
+    function createFirstChart(values) {
+        var times = [];
+        values.forEach(d => {
+            if(d.fkSensor == 1){
+                times.push(parseDate(new Date(d.dt_hora)));
+            }
+        })
+        var temperatures = [];
+        values.forEach(d => {
+            if (d.fkSensor == 1) {
+                temperatures.push(d.valor);
+            }
+        })
+
+        const labels = times;
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Temperatura °C',
+                backgroundColor: 'rgb(77,77,77)',
+                borderColor: 'rgb(77,77,77)',
+                data: temperatures
+            }]
+        }
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        suggestedMin: 0,
+                        suggestedMax: 10
+                    },
+                    x: {
+                        suggestedMax: 10
+                    }
+
+                },
+                plugins: {
+                    title: {
+                        text: "Temperatura °C"
+
+
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: "Montserrat",
+                                weight: "bold"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        new Chart(
+            document.getElementById('first_chart'),
+            config
+        )
+    }
+
+    function createSecondChart(values) {
+        var times = [];
+        values.forEach(d => {
+            if(d.fkSensor == 1){
+                times.push(parseDate(new Date(d.dt_hora)));
+            }
+        })
+        var temperatures = [];
+        var isPresent = [];
+        values.forEach(d => {
+            if (d.fkSensor == 1) {
+                temperatures.push(d.valor);
+            } else {
+                isPresent.push(d.valor);
+            }
+        })
+
+        const labels2 = times;
+        const data2 = {
+            labels: labels2,
+            datasets: [{
+                label: 'Temperatura °C',
+                backgroundColor: 'rgb(77,77,77)',
+                borderColor: 'rgb(77,77,77)',
+                data: temperatures,
+                yAxisID: 'Temperatura',
+                type: 'line',
+                tension: 0.4
+            },
+            {
+                label: 'Abertura',
+                backgroundColor: 'rgb(224,224,224)',
+                borderColor: 'rgb(224,224,224)',
+                data: isPresent,
+                yAxisID: 'Y',
+                type: 'bar'
+            }
+            ]
+
+        }
+        const config2 = {
+            data: data2,
+            options: {
+                responsive: true,
+                scales: {
+                    Y: {
+                        type: 'linear',
+                        position: 'left'
+                    },
+                    Temperatura: {
+                        beginAtZero: true,
+                        suggestedMax: 10,
+                        type: 'linear',
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            callback: function (value, index, values) {
+                                return `${value} °C `
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        text: "Temperatura °C"
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: "Montserrat",
+                                weight: "bold"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        new Chart(
+            document.getElementById('second_chart'),
+            config2
+        )
+    }
 </script>

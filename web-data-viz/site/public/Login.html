@@ -70,29 +70,18 @@
                 senhaServer: senha
             })
         }).then(function (resposta) {
-            
-
             if (resposta.ok) {
-                console.log(resposta);
-
                 resposta.json().then(json => {
-                  
-
                     sessionStorage.EMAIL_USUARIO = json.email;
                     sessionStorage.NOME_USUARIO = json.nome;
                     sessionStorage.ID_USUARIO = json.id;
-
-                    window.location.href = "../dashboard/dashboard.html"
-
+                    sessionStorage.PERMISSAO = json.fkPermissao;
+                    window.location = 'dashboard/dashboard.html';
                 });
 
             } else {
-
-             
-
                 resposta.text().then(texto => {
-                    console.error(texto);
-                  
+                    alert("Usuário e/ou senha inválidos") 
                 });
             }
 

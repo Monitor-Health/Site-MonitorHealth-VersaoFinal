@@ -87,31 +87,25 @@
                         <input type="file" name="arquivo" id="arquivo">
                     </div>
                 </div>
-                <div style="margin-left: 53px; margin-top: -5px;">
-                    <input required class="input" style="width: 400px; font-size: 22px; height: 50px;" type="text"
-                        id="input_nome" placeholder="Nome">
-                    <input required class="input" style="width: 400px; font-size: 22px; height: 50px;" type="text"
-                        id="input_sobrenome" placeholder="Sobrenome">
-                </div>
-
                 <div class="centro_cadastro">
                     <select required id="select_permissao" class="input"
                         style="width: 400px; font-size: 22px; height: 50px; margin-left: 53px; color: #757575;">
                         <option value="" disabled selected>Permissão</option>
-                        <option value="Administrador">Administrador</option>
-                        <option value="Intermediário">Intermediário</option>
-                        <option value="Básico">Básico</option>
+                        <option value="1">Administrador</option>
+                        <option value="2">Básico</option>
                     </select><br>
                 </div>
 
                 <div class="centro_cadastro">
-                    <input required class="input" style="margin-left: 53px; font-size: 22px; width: 400px; height: 50px;"
-                        type="email" id="input_email" placeholder="E-mail">
+                    <input required class="input"
+                        style="margin-left: 53px; font-size: 22px; width: 400px; height: 50px;" type="email"
+                        id="input_email" placeholder="E-mail">
                 </div>
 
                 <div style="margin-bottom: 8px;" class="centro_cadastro">
-                    <input required class="input" style="margin-left: 53px; font-size: 22px; width: 400px; height: 50px;"
-                        type="password" id="input_senha" placeholder="Senha">
+                    <input required class="input"
+                        style="margin-left: 53px; font-size: 22px; width: 400px; height: 50px;" type="password"
+                        id="input_senha" placeholder="Senha">
                 </div>
 
                 <div style="margin-top: -15px;" class="centro_cadastro">
@@ -127,12 +121,6 @@
                 <div class="div_cadastro">
                     <div id="usuarios" class="usuarios">
                         <h2 style="margin-left: 40px;">Usuários Cadastrados</h2>
-                        <div class="usuarios_cadastrados"><img src="https://raw.githubusercontent.com/Monitor-Health/Vetores_Dash/92bd01ccd4d01056b44fc2a5d0341ef4f7f4edbc/foto_perfil.svg"
-                                style="width: 50px;">Carlos Benecke<br>Administrador</div>
-                        <div class="usuarios_cadastrados"><img src="https://raw.githubusercontent.com/Monitor-Health/Vetores_Dash/92bd01ccd4d01056b44fc2a5d0341ef4f7f4edbc/foto_perfil.svg"
-                                style="width: 50px;">Danielle Romano<br>Administrador</div>
-                                <div class="usuarios_cadastrados"><img src="https://raw.githubusercontent.com/Monitor-Health/Vetores_Dash/92bd01ccd4d01056b44fc2a5d0341ef4f7f4edbc/foto_perfil.svg"
-                                    style="width: 50px;">Nicolas Prates<br>Administrador</div>
                         <div id="usuarios_cadastrados"></div>
                     </div>
                 </div>
@@ -141,15 +129,44 @@
     </main>
 
     <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            if (sessionStorage.length == 0) {
+                window.location = "../index.html";
+            } else if (sessionStorage.getItem("PERMISSAO") != 1) {
+                window.location = "./dashboard.html";
+            }
+        })
 
-        function cadastrar() {
-            var nome = input_nome.value;
-            var sobrenome = input_sobrenome.value;
+        async function cadastrar() {
+            var email = input_email.value;
+            var senha = input_senha.value;
             var permissao = select_permissao.value;
+            var usuario = {
+                email,
+                senha,
+                permissao
+            }
+            var resposta = await fetch("/usuarios/cadastrar", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(usuario)
+            })
 
-            usuarios_cadastrados.innerHTML = "";
+            var dados = await resposta.json();
+            await atualizarLista();
+        }
 
-        
-            usuarios_cadastrados.innerHTML += `<div style= "background: #E8E8E8; border-radius: 40px; width: 400px; height: 100px; font-size: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; margin-top: 20px;"><img src="https://raw.githubusercontent.com/Monitor-Health/Vetores_Dash/92bd01ccd4d01056b44fc2a5d0341ef4f7f4edbc/foto_perfil.svg" style="width: 50px;">${nome} ${sobrenome} <br> ${permissao}`;
+        async function atualizarLista() {
+            var resposta = await fetch("/usuarios/listar");
+            var dados = await resposta.json();
+            dados.forEach(usuario => {
+                usuarios_cadastrados.innerHTML = `
+                    <div class="usuarios_cadastrados">
+                        ${usuario.nome}<br>${usuario.permissao}
+                    </div>
+                `;
+            })
         }
     </script>

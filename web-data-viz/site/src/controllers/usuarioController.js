@@ -11,7 +11,7 @@ function entrar(req, res) {
     } else if (senha == undefined) {
         res.status(400).send("Sua senha está indefinida!");
     } else {
-        
+
         usuarioModel.entrar(email, senha)
             .then(
                 function (resultado) {
@@ -38,6 +38,19 @@ function entrar(req, res) {
 
 }
 
+function cadastrar(req, res) {
+    usuarioModel.cadastrar(req.body, req.body.permissao);
+    res.status(200);
+}
+
+function listar(req, res){
+    usuarioModel.listar().then(function (resultado) {
+        res.json(resultado)
+    })
+}
+
 module.exports = {
-    entrar
+    entrar,
+    cadastrar,
+    listar
 }

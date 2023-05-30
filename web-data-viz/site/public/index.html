@@ -34,8 +34,8 @@
     <div class="fundo">
         <div id="home" class="header">
             <div class="container">
-                <a href="../index.html"><img
-                        src="../Vetores/logo_monitor_health_branco.svg" width="180px" class="logo"></a>
+                <a href="../index.html"><img src="../Vetores/logo_monitor_health_branco.svg" width="180px"
+                        class="logo"></a>
                 <ul class="navbar">
                     <li><a href="../index.html">Página Inicial</a></li>
                     <li><a href="../Vac_Sense.html">VacSense</a></li>
@@ -67,8 +67,8 @@
                 </div>
                 <div style="margin-left: -550px;">
                     <div class="budget-home">
-                        <a href="../Simulador_Financeiro.html"><button
-                                class="botao_cliente">Calcule sua Economia</button></a>
+                        <a href="../Simulador_Financeiro.html"><button class="botao_cliente">Calcule sua
+                                Economia</button></a>
                         <img class="calculator-home" src="../Vetores/calc.png" alt="">
                     </div>
                 </div><br><br>
@@ -310,7 +310,7 @@
                 que a Monitor Health traz à vida os dispositivo certo para cada necessidade do ambiente.
             </p>
 
-            <div style="margin-top: -50px;" class="content-tools" >
+            <div style="margin-top: -50px;" class="content-tools">
                 <img class="circuit-tools2" src="../Vetores/Computer troubleshooting-amico 1.png" width="300px">
                 <div id="content-about">
                     <h1 class="title-about">Soluções</h1>
@@ -370,8 +370,7 @@
                     </div>
                 </div>
                 <div>
-                    <a href="../index.html"><img
-                            src="../Vetores/logo_monitor_health_branco.svg" width="200x"></a>
+                    <a href="../index.html"><img src="../Vetores/logo_monitor_health_branco.svg" width="200x"></a>
                 </div>
             </div>
 
@@ -412,12 +411,8 @@
             </div>
         </div>
     </footer>
-
+    <script src="./js/funcoes.js"></script>
     <script src=" https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
-
-   
-
-    <!-- Initialize Swiper -->
     <script>
         var swiper = new Swiper(".mySwiper", {
             slidesPerView: 3,
@@ -428,8 +423,8 @@
             },
         });
 
-        function open_modal(){
-    fade.innerHTML = `
+        function open_modal() {
+            fade.innerHTML = `
     <div class="hide">
     <div class="hide2">
 
@@ -442,30 +437,25 @@
     
 
         <form>
-        <input type="name" class="colocar" placeholder="Nome do Responsável"><br>
-        <input type="name" class="colocar" placeholder="Nome da Empresa"><br>
-        <input type="number" class="colocar" placeholder="Telefone"><br>
-        <input type="e-mail" class="colocar" placeholder="E-mail"><br>
+        <input id="input_responsavel" type="name" class="colocar" placeholder="Nome do Responsável"><br>
+        <input id="input_empresa" type="name" class="colocar" placeholder="Nome da Empresa"><br>
+        <input id="input_telefone" type="number" class="colocar" placeholder="Telefone"><br>
+        <input id="input_email" type="email" class="colocar" placeholder="E-mail"><br>
         </form>
         
-        <button onclick="alert_modal()" class="floating">Peça seu orçamento</button>
+        <button onclick="sendMail()" class="floating">Peça seu orçamento</button>
     </div>
     </div>
 </div>
     `
-}
+        }
 
-function close_modal(){
-    fade.innerHTML = " "
-}
-
-function alert_modal(){
-    alert("Orçamento enviado com sucesso!")
-    fade.innerHTML = " "
-}
+        function close_modal() {
+            fade.innerHTML = " "
+        }
     </script>
-
     
+
 </body>
 
 </html>

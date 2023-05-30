@@ -135,9 +135,10 @@
             } else if (sessionStorage.getItem("PERMISSAO") != 1) {
                 window.location = "./dashboard.html";
             }
+            atualizarLista();
         })
 
-        async function cadastrar() {
+        function cadastrar() {
             var email = input_email.value;
             var senha = input_senha.value;
             var permissao = select_permissao.value;
@@ -146,27 +147,49 @@
                 senha,
                 permissao
             }
-            var resposta = await fetch("/usuarios/cadastrar", {
+            fetch("/usuarios/cadastrar", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(usuario)
             })
-
-            var dados = await resposta.json();
-            await atualizarLista();
+            atualizarLista(usuario);
         }
 
-        async function atualizarLista() {
-            var resposta = await fetch("/usuarios/listar");
-            var dados = await resposta.json();
-            dados.forEach(usuario => {
-                usuarios_cadastrados.innerHTML = `
-                    <div class="usuarios_cadastrados">
-                        ${usuario.nome}<br>${usuario.permissao}
+        function atualizarLista(usuario) {
+            if(usuario != undefined){
+                let permissao = ""
+                if(usuario.permissao == 1){
+                    permissao = "Administrador";
+                }else{
+                    permissao = "Básico";
+                }
+                usuarios_cadastrados.innerHTML += `
+                    <div class='usuarios_cadastrados'>
+                        ${usuario.email}<br>
+                        ${permissao}
                     </div>
                 `;
+                return;
+            }
+            fetch('/usuarios/listar')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(user => {
+                    let permission = "";
+                    if(user.fkPermissao == 1){
+                        permission = "Administrador";
+                    }else{
+                        permission = "Básico";
+                    }
+                    usuarios_cadastrados.innerHTML += `
+                        <div class='usuarios_cadastrados'>
+                            ${user.email}<br>
+                            ${permission}
+                        </div>
+                    `;
+                })
             })
         }
     </script>

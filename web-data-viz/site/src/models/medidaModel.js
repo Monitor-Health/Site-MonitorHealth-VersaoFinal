@@ -4,16 +4,7 @@ function buscarUltimasMedidas(idFreezer) {
 
     instrucaoSql = ''
 
-    if (process.env.AMBIENTE_PROCESSO == "producao") {
-        instrucaoSql = `select top ${limite_linhas}
-        dht11_temperatura as temperatura, 
-        dht11_umidade as umidade,  
-                        momento,
-                        FORMAT(momento, 'HH:mm:ss') as momento_grafico
-                    from medida
-                    where fk_aquario = ${idAquario}
-                    order by id desc`;
-    } else if (process.env.AMBIENTE_PROCESSO == "desenvolvimento") {
+     if (process.env.AMBIENTE_PROCESSO == "desenvolvimento") {
         instrucaoSql = `select * from monitorhealth.dados join sensor on dados.fkidsensor = sensor.id and dados.fktiposensor = sensor.tipo where dados.fkidsensor = ${idFreezer} order by dados.dt_hora desc limit 20`;
     } else {
         console.log("\nO AMBIENTE (produção OU desenvolvimento) NÃO FOI DEFINIDO EM app.js\n");
@@ -24,20 +15,10 @@ function buscarUltimasMedidas(idFreezer) {
     return database.executar(instrucaoSql);
 }
 
-function buscarMedidasEmTempoReal(idAquario) {
+function buscarMedidasEmTempoReal() {
 
-    instrucaoSql = ''
-
-    if (process.env.AMBIENTE_PROCESSO == "producao") {
-        instrucaoSql = `select top 1
-        dht11_temperatura as temperatura, 
-        dht11_umidade as umidade,  
-                        CONVERT(varchar, momento, 108) as momento_grafico, 
-                        fk_aquario 
-                        from medida where fk_aquario = ${idAquario} 
-                    order by id desc`;
-
-    } else if (process.env.AMBIENTE_PROCESSO == "desenvolvimento") {
+    instrucaoSql = '';
+    if (process.env.AMBIENTE_PROCESSO == "desenvolvimento") {
         instrucaoSql = `select * from monitorhealth.dados`;
     } else {
         console.log("\nO AMBIENTE (produção OU desenvolvimento) NÃO FOI DEFINIDO EM app.js\n");

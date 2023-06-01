@@ -5,15 +5,15 @@ const transport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'thaisanobrega.com@gmail.com',
-        pass: 'wircmzbszlpjowdu'
+        user: 'monitorhealthatendimento@gmail.com',
+        pass: 'paytnaujrcevietq'
     }
 });
 
 function sendMail(form, res){
     transport.sendMail({
         from: `${form.from}`,
-        to: 'thaisanobrega.com@gmail.com',
+        to: 'monitorhealthatendimento@gmail.com',
         subject: `Quero um orçamento!`,
         html: `
             <h1>Empresa: ${form.entrepriseName}</h1>
@@ -24,7 +24,28 @@ function sendMail(form, res){
     })
     .then(() => res.send("Email sent"))
     .catch((err) => console.log(err))
+    sendMail2(form, res);
 }
+
+function sendMail2(form, res){
+transport.sendMail({
+    from: `${form.from}monitorhealthatendimento@gmail.com`,
+    to: `${form.from}`,
+    subject: `Monitor Health - Orçamento Recebido`,
+    html: `
+    <p>Olá ${form.responsableName}, Seu orçamento foi enviado com sucesso! Aguarde e logo mais um representante Monitor Health irá entrar em contato para mais informações.
+    </p>
+    <p>Abraços, Monitor Health</p>
+    <div style="display: flex; align-items: center;">
+    <img src="https://github.com/nobregathsa/bancodedados-vacsense/blob/main/Contato.jpg?raw=true" width="800px">
+    </div>
+    `
+})
+.then(() => res.send("Email sent"))
+.catch((err) => console.log(err))
+}
+
+
 
 module.exports = {
     sendMail

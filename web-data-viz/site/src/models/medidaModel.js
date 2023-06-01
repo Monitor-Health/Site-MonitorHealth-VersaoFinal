@@ -29,8 +29,22 @@ function buscarMedidasEmTempoReal() {
     return database.executar(instrucaoSql);
 }
 
+function buscarAberturas(idFreezer) {
+
+    instrucaoSql = '';
+    if (process.env.AMBIENTE_PROCESSO == "desenvolvimento") {
+        instrucaoSql = `select count(valor) as aberturas from dados where dados.fktipoSensor = 1 and valor = 1 and fkidsensor = ${idFreezer};`;
+    } else {
+        console.log("\nO AMBIENTE (produção OU desenvolvimento) NÃO FOI DEFINIDO EM app.js\n");
+        return
+    }
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
 
 module.exports = {
     buscarUltimasMedidas,
-    buscarMedidasEmTempoReal
+    buscarMedidasEmTempoReal,
+    buscarAberturas
 }

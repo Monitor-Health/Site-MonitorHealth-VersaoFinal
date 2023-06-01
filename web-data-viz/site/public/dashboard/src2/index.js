@@ -1,7 +1,7 @@
 document.getElementById("profile-name").value = `Olá, ${sessionStorage.getItem("EMAIL_USUARIO")}`
 document.getElementById("permission").value = `${() => {
-    
-    if (sessionStorage.getItem("PERMISSAO") == 1){
+
+    if (sessionStorage.getItem("PERMISSAO") == 1) {
         return "administrador"
     } else {
         return "básico"
@@ -23,81 +23,69 @@ var freezer = 1;
 var firstChart = document.getElementById('first_chart');
 var secondChart = document.getElementById('second_chart');
 
-var totalAberturasFreezer1 = 0;
-var totalAberturasFreezer2 = 0;
-var totalAberturasFreezer3 = 0;
-var totalAberturasFreezer4 = 0;
-var totalAberturasFreezer5 = 0;
-
 async function updateDash(firstChart, secondChart) {
-    showAlerts();
     freezer = Number(input_freezer.value)
     var temperaturas = [];
     var isPresent = [];
     const resposta = await fetch(`/medidas/ultimas/${freezer}`);
+    const aberturas = await (await fetch(`/medidas/aberturas/${freezer}`)).json();
     const dados = await resposta.json();
 
     var soma = 0;
     var temperaturas = [];
     for (var i = 0; i < dados.length; i++) {
         var dado = dados[i]
-        if (dado.tipo == 1) {
-            if (dado.fkidSensor == 1) {
-                if (dado.valor == 1) {
-                    totalAberturasFreezer1++;
-                }
-            } else if (dado.fkidSensor == 2) {
-                if (dado.valor == 1) {
-                    totalAberturasFreezer2++;
-                }
-            } else if (dado.fkidSensor == 3) {
-                if (dado.valor == 1) {
-                    totalAberturasFreezer3++;
-                }
-            } else if (dado.fkidSensor == 4) {
-
-                if (dado.valor == 1) {
-                    totalAberturasFreezer4++;
-                }
-
-            } else if (dado.fkidSensor == 5) {
-                if (dado.valor == 1) {
-                    totalAberturasFreezer5++;
-                }
-
-            }
-        } else {
+        if (dado.fktipoSensor == 2) {
             soma += dado.valor;
-            if (dado.fktipoSensor == 2) {
-                temperaturas.push(dado.valor);
-            }
+            temperaturas.push(dado.valor);
         }
     }
 
     var media = soma / dados.length;
-    if (media >= 8 || media <= 2) {
-        indicator_avg_temp.classList.remove("warning");
+    var tempAtual = temperaturas[temperaturas.length - 1];
+    if (media > 8) {
+        indicator_avg_temp.classList = "indicator";
         indicator_avg_temp.classList.add("danger");
-
-    } else {
-        indicator_avg_temp.classList.remove("danger");
-        indicator_avg_temp.classList.remove("warning");
+    } else if (media >= 6.27 && media <= 8) {
+        indicator_avg_temp.classList = "indicator";
+        indicator_avg_temp.classList.add("emergency");
+    } else if (media >= 5.09 && media <= 6.26) {
+        indicator_avg_temp.classList = "indicator";
+        indicator_avg_temp.classList.add("warning");
+    } else if (media >= 3.38 && media <= 5.08) {
+        indicator_avg_temp.classList = "indicator";
         indicator_avg_temp.classList.add("success");
+    } else if (media >= 2 && media <= 3.37) {
+        indicator_avg_temp.classList = "indicator";
+        indicator_avg_temp.classList.add("light-blue");
+    } else {
+        indicator_avg_temp.classList = "indicator";
+        indicator_avg_temp.classList.add("freezing");
     }
 
-    if (freezer == 1) {
-        measurement.innerHTML = totalAberturasFreezer1;
-    } else if (freezer == 2) {
-        measurement.innerHTML = totalAberturasFreezer2;
-    } else if (freezer == 3) {
-        measurement.innerHTML = totalAberturasFreezer3;
-    } else if (freezer == 4) {
-        measurement.innerHTML = totalAberturasFreezer4;
+    if (tempAtual > 8) {
+        indicator_current_temp.classList = "indicator";
+        indicator_current_temp.classList.add("danger");
+    } else if (tempAtual >= 6.27 && tempAtual <= 8) {
+        indicator_current_temp.classList = "indicator";
+        indicator_current_temp.classList.add("emergency");
+    } else if (tempAtual >= 5.09 && tempAtual <= 6.26) {
+        indicator_current_temp.classList = "indicator";
+        indicator_current_temp.classList.add("warning");
+    } else if (tempAtual >= 3.38 && tempAtual <= 5.08) {
+        indicator_current_temp.classList = "indicator";
+        indicator_current_temp.classList.add("success");
+    } else if (tempAtual >= 2 && tempAtual <= 3.37) {
+        indicator_current_temp.classList = "indicator";
+        indicator_current_temp.classList.add("light-blue");
     } else {
-        measurement.innerHTML = totalAberturasFreezer5;
+        indicator_current_temp.classList = "indicator";
+        indicator_current_temp.classList.add("freezing");
     }
-    console.log(temperaturas);
-    current_temp.innerHTML = temperaturas[temperaturas.length - 1].toFixed(2);
+    
+    measurement.innerHTML = aberturas[0].aberturas / 20 + 'min';
+
+    current_temp.innerHTML = tempAtual.toFixed(2);
     avg.innerHTML = media.toFixed(2);
 
     var times = []
@@ -124,11 +112,11 @@ async function updateDash(firstChart, secondChart) {
             }
         }
     }
-    firstChart.config.data.labels.splice(0, 1);
-    firstChart.data.datasets[0].data.splice(0, 1);
+    firstChart.config.data.labels.shift();
+    firstChart.data.datasets[0].data.shift();
 
-    secondChart.config.data.labels.splice(0, 1);
-    secondChart.data.datasets[0].data.splice(0, 1);
+    secondChart.config.data.labels.shift();
+    secondChart.data.datasets[0].data.shift();
 
     firstChart.data.datasets[0].data = temperaturas;
     firstChart.config.data.labels = times;
@@ -148,7 +136,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     const dados = await resposta.json();
     createFirstChart(dados);
     createSecondChart(dados);
-    updateDash();
+    updateDash(firstChart, secondChart);
+    showAlerts()
 });
 
 async function showAlerts() {
@@ -165,59 +154,59 @@ async function showAlerts() {
         var ultimaTemperatura = temperaturasTodosFreezer[i].temperatura;
         var ultimoFreezer = temperaturasTodosFreezer[i].freezer;
         if (ultimaTemperatura > 8) {
-            alertas.push({
+            await Swal.fire({
                 title: `Freezer: ${ultimoFreezer}, Derretendo`,
                 timer: 3000,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 color: "white",
-                background: "red"
+                background: "#c55353"
             });
         } else if (ultimaTemperatura >= 6.27 && ultimaTemperatura <= 8) {
-            alertas.push({
+            await Swal.fire({
                 title: `Freezer: ${ultimoFreezer}, Emergência`,
                 timer: 3000,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 color: "white",
-                background: "pink"
+                background: "#e7b1b1"
             });
         } else if (ultimaTemperatura >= 5.09 && ultimaTemperatura <= 6.26) {
-            alertas.push({
+            await Swal.fire({
                 title: `Freezer: ${ultimoFreezer}, Quente`,
                 timer: 3000,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
-                color: "white",
-                background: "yellow"
+                color: "black",
+                background: "#f9ec93"
             })
         } else if (ultimaTemperatura >= 2 && ultimaTemperatura <= 3.37) {
-            alertas.push({
+            await Swal.fire({
                 title: `Freezer: ${ultimoFreezer}, Frio`,
                 timer: 3000,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 color: "white",
-                background: "lightblue"
+                background: "#9fb7c3"
             });
         } else if (ultimaTemperatura < 2) {
-            alertas.push({
+            await Swal.fire({
                 title: `Freezer: ${ultimoFreezer}, Congelante`,
                 timer: 3000,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 color: "white",
-                background: "blue"
+                background: "#5384a2"
             })
 
         }
     }
-    Swal.queue(alertas)
+    setTimeout(showAlerts(), 1000);
 }
 
 
@@ -379,6 +368,7 @@ function createSecondChart(values) {
     var ctx = document.getElementById('second_chart');
     secondChart = new Chart(ctx, config2)
 }
+
 
 function parseDate(data) {
     const dia = String(data.getDate()).padStart(2, '0')

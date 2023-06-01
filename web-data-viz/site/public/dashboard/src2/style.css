@@ -253,21 +253,30 @@ ul li a:hover{
     border: 2px solid #bbbbbb;
     margin-top: 30px;
 }
+/* Cores Alerta*/
 
 .success{
-    background-color: var(--color-success);
+    background-color: #91b591;
 }
 
 .danger{
-    background-color: var(--color-danger);
+    background-color: #c55353;
 }
 
 .warning{
-    background-color: var(--color-warning);
+    background-color: #f9ec93;
 }
 
 .freezing{
-    background-color: var(--color-freezing);
+    background-color: #5384a2;
+}
+
+.emergency{
+    background-color: #e7b1b1;
+}
+
+.light-blue{
+    background-color: #9fb7c3;
 }
 
 .normal{

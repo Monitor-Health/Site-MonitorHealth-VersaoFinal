@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./src2/style-cadastro.css">
+    <link rel="stylesheet" href="./src2/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" type="image/png" href="../Vetores/icone.png">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,18 +59,12 @@
             <div>
                 <header>
                     <div>
-                        <h1>Cadastrar Usuários</h1>
+                        <h1 class="titulo-cadastro">Cadastrar Usuários</h1>
                     </div>
                 </header>
 
                 <div class="usuario">
-                    <div class="imagem_usuario">
-                        <img src="https://raw.githubusercontent.com/Monitor-Health/Vetores_Dash/92bd01ccd4d01056b44fc2a5d0341ef4f7f4edbc/foto_perfil.svg"
-                            style="width: 160px; margin-left: 53px;">
-                        <h3 style="color: #1e3a4e; margin-top: 30px; margin-left: 66px;">Foto de perfil</h3>
-                        <label for="arquivo">Enviar Aquivo</label>
-                        <input type="file" name="arquivo" id="arquivo">
-                    </div>
+                 
                 </div>
                 <div class="centro_cadastro">
                     <select required id="select_permissao" class="input"
@@ -104,10 +99,28 @@
             <div>
                 <div class="div_cadastro">
                     <div id="usuarios" class="usuarios">
-                        <h2 style="margin-left: 40px;">Usuários Cadastrados</h2>
+                        <h2 style="margin-left: 40px; color: #4d4d4d;">Usuários Cadastrados</h2>
                         <div id="usuarios_cadastrados"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="profile-usuarios">
+            <img class="photo" src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/foto_perfil.svg?raw=true"
+                alt="Foto de Perfil">
+            <div class="description">
+                <h3 class="profile-name" id="profile-name">Olá, Thaisa</h3>
+                <small id="permission">Administrador</small>
+            </div>
+            <hr class="line">
+            <div class="notification">
+                <span class="notification-text" style="margin-top: 10px;">Faixas</span>
+                <img class="icon" style="margin-left: 300px ;"
+                    src="https://github.com/Monitor-Health/Vetores_Dash/blob/main/icone_notifica%C3%A7%C3%A3o.svg?raw=true"
+                    alt="">
+            </div>
+            <div>
+                <img width="230" style="margin-top: 10px;" src="https://github.com/nobregathsa/bancodedados-vacsense/blob/main/Menor%202%C2%B0%20(1).jpg?raw=true" alt="">
             </div>
         </div>
     </main>

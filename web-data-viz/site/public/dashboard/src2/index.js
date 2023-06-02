@@ -41,8 +41,62 @@ async function updateDash(firstChart, secondChart) {
         }
     }
 
+    var hora = aberturas[0].aberturas / 20;
+    var minuto = (hora - parseInt(hora)) * 60;
+    var hora_texto = parseInt(hora);
+    var minuto_texto = parseInt(minuto);
+    if(hora_texto <= 9){
+        hora_texto = "0" + hora_texto;
+    }
+    if(minuto_texto <= 9){
+        minuto_texto = "0" + minuto_texto;
+    }
+    measurement.innerHTML = `${hora_texto}:${minuto_texto}`;
+
+    var times = []
+    for (let i = dados.length; i > 0; i--) {
+        var value = dados[i - 1];
+        if (value.fktipoSensor == 2) {
+            times.push(parseDate(new Date(value.dt_hora)));
+        }
+    }
+
+    var temperaturas = [];
+    for (let i = dados.length; i > 0; i--) {
+        var value = dados[i - 1];
+        if (value.fktipoSensor == 2) {
+            temperaturas.push(value.valor);
+        }
+    }
+    var isPresent = [];
+    for (let i = 0; i < dados.length; i++) {
+        var value = dados[i];
+        if (value.fktipoSensor == 1) {
+            if (value.valor == 1) {
+                isPresent.push(value.valor);
+            }
+        }
+    }
+    firstChart.config.data.labels.shift();
+    firstChart.data.datasets[0].data.shift();
+    
+    secondChart.config.data.labels.shift();
+    secondChart.data.datasets[0].data.shift();
+    
+    firstChart.data.datasets[0].data = temperaturas;
+    firstChart.config.data.labels = times;
+    secondChart.data.datasets[0].data = temperaturas;
+    secondChart.data.datasets[1].data = isPresent;
+    secondChart.config.data.labels = times;
+    firstChart.update();
+    secondChart.update();
     var media = soma / dados.length;
     var tempAtual = temperaturas[temperaturas.length - 1];
+    indicators(media, tempAtual)
+    setTimeout(() => updateDash(firstChart, secondChart), 1000)
+}
+
+function indicators(media, tempAtual){
     if (media > 8) {
         indicator_avg_temp.classList = "indicator";
         indicator_avg_temp.classList.add("danger");
@@ -82,50 +136,8 @@ async function updateDash(firstChart, secondChart) {
         indicator_current_temp.classList = "indicator";
         indicator_current_temp.classList.add("freezing");
     }
-    
-    measurement.innerHTML = aberturas[0].aberturas / 20 + 'min';
-
     current_temp.innerHTML = tempAtual.toFixed(2);
     avg.innerHTML = media.toFixed(2);
-
-    var times = []
-    for (let i = dados.length; i > 0; i--) {
-        var value = dados[i - 1];
-        if (value.fktipoSensor == 2) {
-            times.push(parseDate(new Date(value.dt_hora)));
-        }
-    }
-
-    var temperaturas = [];
-    for (let i = dados.length; i > 0; i--) {
-        var value = dados[i - 1];
-        if (value.fktipoSensor == 2) {
-            temperaturas.push(value.valor);
-        }
-    }
-    var isPresent = [];
-    for (let i = 0; i < dados.length; i++) {
-        var value = dados[i];
-        if (value.fktipoSensor == 1) {
-            if (value.valor == 1) {
-                isPresent.push(value.valor);
-            }
-        }
-    }
-    firstChart.config.data.labels.shift();
-    firstChart.data.datasets[0].data.shift();
-
-    secondChart.config.data.labels.shift();
-    secondChart.data.datasets[0].data.shift();
-
-    firstChart.data.datasets[0].data = temperaturas;
-    firstChart.config.data.labels = times;
-    secondChart.data.datasets[0].data = temperaturas;
-    secondChart.data.datasets[1].data = isPresent;
-    secondChart.config.data.labels = times;
-    firstChart.update();
-    secondChart.update();
-    setTimeout(() => updateDash(firstChart, secondChart), 1000)
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -144,66 +156,84 @@ async function showAlerts() {
     const response = await fetch('/medidas/tempo-real');
     const data = await response.json();
     const temperaturasTodosFreezer = [];
-    const alertas = []
-    data.forEach(dado => {
-        if (dado.fktipoSensor == 2) {
-            temperaturasTodosFreezer.push({ temperatura: dado.valor, freezer: dado.fkidSensor });
-        }
-    });
-    for (var i = temperaturasTodosFreezer.length - 1; i > temperaturasTodosFreezer.length - 6; i--) {
-        var ultimaTemperatura = temperaturasTodosFreezer[i].temperatura;
+    for(let i = 0; i < data.length; i++){
+        temperaturasTodosFreezer.push({
+            freezer: data[i].fkidSensor,
+            valor: data[i].valor,
+            tipo: data[i].fktipoSensor,
+            data: parseDate(new Date(data[i].dt_hora))
+        });
+    }
+    console.log(temperaturasTodosFreezer);
+    for (var i = temperaturasTodosFreezer.length - 1; i > temperaturasTodosFreezer.length - 11; i--) {
         var ultimoFreezer = temperaturasTodosFreezer[i].freezer;
-        if (ultimaTemperatura > 8) {
+        var valor = temperaturasTodosFreezer[i].valor;
+        var tipoSensor = temperaturasTodosFreezer[i].tipo;
+        var tempo = temperaturasTodosFreezer[i].data.split(":");
+        var hora = tempo[0];
+        if (tipoSensor == 2) {
+            if (valor > 8) {
+                await Swal.fire({
+                    title: `Freezer: ${ultimoFreezer}, Derretendo`,
+                    timer: 3000,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    color: "white",
+                    background: "#c55353"
+                });
+            } else if (valor >= 6.27 && valor <= 8) {
+                await Swal.fire({
+                    title: `Freezer: ${ultimoFreezer}, Emergência`,
+                    timer: 3000,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    color: "white",
+                    background: "#e7b1b1"
+                });
+            } else if (valor >= 5.09 && valor <= 6.26) {
+                await Swal.fire({
+                    title: `Freezer: ${ultimoFreezer}, Quente`,
+                    timer: 3000,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    color: "black",
+                    background: "#f9ec93"
+                })
+            } else if (valor >= 2 && valor <= 3.37) {
+                await Swal.fire({
+                    title: `Freezer: ${ultimoFreezer}, Frio`,
+                    timer: 3000,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    color: "white",
+                    background: "#9fb7c3"
+                });
+            } else if (valor < 2) {
+                await Swal.fire({
+                    title: `Freezer: ${ultimoFreezer}, Congelante`,
+                    timer: 3000,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    color: "white",
+                    background: "#5384a2"
+                })
+            }
+        }
+        if (valor == 1 && tipoSensor == 1 && ultimoFreezer == 2 && (hora >= 14 && hora <= 16)) {
             await Swal.fire({
-                title: `Freezer: ${ultimoFreezer}, Derretendo`,
-                timer: 3000,
+                title: `Freezer: ${ultimoFreezer}, ABERTO FORA DO HORÁRIO`,
+                timer: 5000,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 color: "white",
-                background: "#c55353"
-            });
-        } else if (ultimaTemperatura >= 6.27 && ultimaTemperatura <= 8) {
-            await Swal.fire({
-                title: `Freezer: ${ultimoFreezer}, Emergência`,
-                timer: 3000,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                color: "white",
-                background: "#e7b1b1"
-            });
-        } else if (ultimaTemperatura >= 5.09 && ultimaTemperatura <= 6.26) {
-            await Swal.fire({
-                title: `Freezer: ${ultimoFreezer}, Quente`,
-                timer: 3000,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                color: "black",
-                background: "#f9ec93"
+                background: "black"
             })
-        } else if (ultimaTemperatura >= 2 && ultimaTemperatura <= 3.37) {
-            await Swal.fire({
-                title: `Freezer: ${ultimoFreezer}, Frio`,
-                timer: 3000,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                color: "white",
-                background: "#9fb7c3"
-            });
-        } else if (ultimaTemperatura < 2) {
-            await Swal.fire({
-                title: `Freezer: ${ultimoFreezer}, Congelante`,
-                timer: 3000,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                color: "white",
-                background: "#5384a2"
-            })
-
         }
     }
     setTimeout(showAlerts(), 1000);

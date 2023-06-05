@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="../Vetores/icone.png">
     <link rel="stylesheet" href="./css/Cadastro.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Cadastro</title>
 </head>
 
@@ -15,6 +16,11 @@
     <div class="alling_floating">
         <button onclick="open_modal()" class="floating">$ Faça seu Orçamento</button>
     </div>
+
+    <div id="div_alert"
+        style=" display: flex !important; z-index: 99999; align-items: center; justify-content: center;position: absolute; left: 38%;">
+    </div>
+
     <!-- header -->
     <!-- header -->
     <div class="fundo" style="margin-bottom: -20px;">
@@ -26,7 +32,7 @@
                     <li><a href="../Vac_Sense.html">VacSense</a></li>
                     <li><a href="../Simulador_Financeiro.html">Simulador</a></li>
                     <li><a href="../Cadastro.html">Cadastro</a></li>
-                    <li><a href="https://monitorhealth.freshdesk.com/support/home">Suporte</a></li>
+                    <li><a href="https://monitorhealthatendimento.freshdesk.com/support/home">Suporte</a></li>
                     <a href="../Login.html"><button class="botao_cliente">Área do Cliente</button></a>
 
                 </ul>
@@ -41,28 +47,34 @@
         <div class="container2">
             <!-- começa fundo cinza -->
 
-            <form action="" class="engloba">
+            <div class="engloba">
                 <div style="margin-top: 5px;" class="centro_cadastro">
                     <h3>Cadastre-se</h3>
                 </div>
 
                 <div style=" margin-left: 53px; margin-top: -5px;" class="centro_cadastro">
-                    <input id="input_empresa" required class="input" style="width: 300px;" type="text" placeholder="Nome da Empresa*">
+                    <input id="input_empresa" required class="input" style="width: 300px;" type="text"
+                        placeholder="Nome da Empresa*">
                     <input id="input_cnpj" required class="input" style="width: 180px; margin-left: 5px;" type="number"
                         placeholder="CNPJ*">
-                        <input id="input_numero" required class="input" style="width: 180px; margin-left: 5px;" type="number"
-                        placeholder="numero">
+                    <!-- <input id="input_numero" required class="input" style="width: 180px; margin-left: 5px;" type="number"
+                        placeholder="Número">
                         <input id="input_complemento" required class="input" style="width: 180px; margin-left: 5px;" type="number"
-                        placeholder="complemento">
+                        placeholder="Complemento"> -->
                 </div>
 
                 <div class="centro_cadastro">
-                    <select id="input_segmento" required class="input" style=" margin-left: 53px; width: 250px; color: #757575;">
+                    <select id="input_segmento" required class="input"
+                        style=" margin-left: 53px; width: 250px; color: #757575;">
                         <option value="" disabled selected>Segmento</option>
                         <option value="1">Fabricante de Medicamentos</option>
                         <option value="2">Instalação Hospitalar</option>
                         <option value="3">Transporte/Logística</option>
                     </select><br>
+                    <input id="input_numero" required class="input" style="width: 60px; margin-left: -30px; "
+                        type="number" placeholder="N°">
+                    <input id="input_complemento" required class="input" style="width: 100px; margin-left: -30px;"
+                        type="number" placeholder="Complemento">
                 </div>
 
                 <div class="centro_cadastro">
@@ -113,8 +125,8 @@
                 <div class="centro_cadastro">
                     <input required class="input" style="margin-left: 53px; width: 300px;" type="text"
                         id="input_nome_resp" placeholder="Nome do Responsável*">
-                    <input id="input_telefone" required class="input" style=" margin-left: -30px; width: 150px;" type="number"
-                        placeholder="Telefone*">
+                    <input id="input_telefone" required class="input" style=" margin-left: -30px; width: 150px;"
+                        type="number" placeholder="Telefone*">
                 </div>
 
                 <div class="centro_cadastro">
@@ -135,7 +147,7 @@
                 </div>
 
 
-            </form>
+            </div>
         </div>
 
         <!-- começa fundo azul -->
@@ -239,49 +251,71 @@
         var empresa = {
             nomeResponsavel: input_nome_resp.value,
             nomeFantasia: input_empresa.value,
-            cnpj:input_cnpj.value,
-            tipo:input_segmento.value,
-            cep:input_cep.value,
-            logradouro:input_logradouro.value,
-            bairro:input_bairro.value,
-            cidade:input_cidade.value,
-            idEstado:input_estado.value,
-            tel:input_telefone.value,
-            email:input_email.value,
-            numero:input_numero.value,
-            complemento:input_complemento.value
-        }
-        event.preventDefault();
-        div_bem_vindo.innerHTML = `
-    </div>
-    <div class="bem_vindo" id="bem_vindo">
-        <div class="fundo_bem_vindo">
-        <div style=" margin-left: 150px; width: 35%;">
-            <h2>Bem-vindo(a)! ${empresa.nomeResponsavel} </h2> 
-            <p style="color: #525252;">Falta pouco para sua empresa começar a desfrutar de todos os benefícios do sensor VacSense!</p>
-            <p style="color: #525252;"> Aguarde um de nossos representantes entrar em contato para mais informações do serviço.</p>
-            <p style="color: #525252;"> Monitor Health agradece!</p> 
-        </div>
-
-        <div style=" margin-top: 15px; margin-left: 50px; width: 35%;">
-            <img src="../Vetores/vetor_medicamentos.svg" width="300px">
-        </div>
-        </div>
-    </div>
-        `
-        window.location.href = "#bem_vindo";
-        await fetch(`./empresas/cadastrar`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                empresa
+            cnpj: input_cnpj.value,
+            tipo: input_segmento.value,
+            cep: input_cep.value,
+            logradouro: input_logradouro.value,
+            bairro: input_bairro.value,
+            cidade: input_cidade.value,
+            idEstado: input_estado.value,
+            tel: input_telefone.value,
+            email: input_email.value,
+            numero: input_numero.value,
+            complemento: input_complemento.value
+        };
+        if (empresa.nomeResponsavel == "" || empresa.nomeFantasia == "" || empresa.cnpj == "" || empresa.tipo == "" || empresa.cep == "" || empresa.logradouro == "" || empresa.bairro == "" || empresa.cidade == "" || empresa.idEstado == "" || empresa.tel == "" || empresa.email == "" || empresa.numero == "" || empresa.complemento == "") {
+            Swal.fire({
+                title: 'Campos em branco!',
+                icon: 'error',
+                timer: 3000, // Tempo de exibição do toast em milissegundos
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false
             })
-        })
+        } else {
+            event.preventDefault();
+
+            fetch(`./empresas/cadastrar`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    empresa
+                })
+            }).then(() => console.log("Deu certo!"))
+            div_bem_vindo.innerHTML =
+                `
+            </div>
+                <div class="bem_vindo" id="bem_vindo">
+                    <div class="fundo_bem_vindo">
+                    <div style=" margin-left: 150px; width: 35%;">
+                        <h2>Bem-vindo(a)! ${empresa.nomeResponsavel} </h2> 
+                        <p style="color: #525252;">Falta pouco para sua empresa começar a desfrutar de todos os benefícios do sensor VacSense!</p>
+                        <p style="color: #525252;"> Aguarde um de nossos representantes entrar em contato para mais informações do serviço.</p>
+                        <p style="color: #525252;"> Monitor Health agradece!</p> 
+                    </div>
+
+                    <div style=" margin-top: 15px; margin-left: 50px; width: 35%;">
+                        <img src="../Vetores/vetor_medicamentos.svg" width="300px">
+                    </div>
+                </div>
+            </div>
+            `
+            
+            Swal.fire({
+                title: 'Cadastro Efetuado!',
+                icon: 'success',
+                timer: 3000, // Tempo de exibição do toast em milissegundos
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false
+            })
+            
+            window.location = "./Cadastro.html#bem_vindo";
+
+        }
     }
-
-
 
     async function showEndereco() {
         var cep = input_cep.value;
@@ -297,6 +331,7 @@
         var json = await resposta.json();
         return json;
     }
+
 
 
     function open_modal() {
@@ -334,4 +369,6 @@
         alert("Orçamento enviado com sucesso!")
         fade.innerHTML = " "
     }
+
+
 </script>
